@@ -1,7 +1,7 @@
 // Utility functions for transforming our data structures to/from SimStudio format
 // This will be updated once we have the actual SimStudio SDK and documentation
 
-import { GraphData, GraphNode, GraphEdge } from '../types/graph';
+import { GraphData, GraphNode, GraphEdge, GraphInteractionEvent } from '../types/graph';
 import { ExperimentPath } from '../hooks/useDevWorkflowData';
 
 // Placeholder interfaces - will be replaced with actual SimStudio types
@@ -44,8 +44,45 @@ interface SimStudioAgent {
   configuration: Record<string, any>;
 }
 
+// Enhanced structures to better represent real SimStudio capabilities
+interface SimStudioNodeTypes {
+  AGENT: 'agent';
+  ACTION: 'action';
+  CONDITION: 'condition';
+  DECISION: 'decision';
+  TOOL: 'tool';
+  EVENT: 'event';
+  INPUT: 'input';
+  OUTPUT: 'output';
+}
+
+interface SimStudioEdgeTypes {
+  FLOW: 'flow';
+  DATA: 'data';
+  TRIGGER: 'trigger';
+  CONDITION: 'condition';
+}
+
+const NodeTypes: SimStudioNodeTypes = {
+  AGENT: 'agent',
+  ACTION: 'action',
+  CONDITION: 'condition',
+  DECISION: 'decision',
+  TOOL: 'tool',
+  EVENT: 'event',
+  INPUT: 'input',
+  OUTPUT: 'output'
+};
+
+const EdgeTypes: SimStudioEdgeTypes = {
+  FLOW: 'flow',
+  DATA: 'data',
+  TRIGGER: 'trigger',
+  CONDITION: 'condition'
+};
+
 /**
- * Transform our experiment data to SimStudio workflow format
+ * Enhanced transform function with more realistic SimStudio-like structure
  */
 export function transformToSimStudioWorkflow(
   experiments: Record<string, ExperimentPath>,
@@ -55,12 +92,38 @@ export function transformToSimStudioWorkflow(
   const edges: SimStudioEdge[] = [];
   const agents: SimStudioAgent[] = [];
 
-  // Transform experiments to SimStudio nodes
+  // 1. Create workflow entry point
+  nodes.push({
+    id: 'workflow-entry',
+    type: NodeTypes.INPUT,
+    label: 'Start Experiments',
+    position: { x: 100, y: 100 },
+    config: {
+      description: 'Entry point for parallel development workflows',
+      inputSchema: {}
+    },
+    status: 'idle'
+  });
+
+  // 2. Create workflow exit point
+  nodes.push({
+    id: 'workflow-exit',
+    type: NodeTypes.OUTPUT,
+    label: 'Complete Experiments',
+    position: { x: 600, y: 500 },
+    config: {
+      description: 'Exit point for parallel development workflows',
+      outputSchema: {}
+    },
+    status: 'idle'
+  });
+
+  // 3. Transform experiments to SimStudio nodes
   Object.values(experiments).forEach((exp, index) => {
     // Main experiment node
     nodes.push({
       id: exp.id,
-      type: 'agent',
+      type: NodeTypes.AGENT,
       label: exp.name,
       position: { x: 200 + index * 300, y: 100 },
       config: {
@@ -80,12 +143,14 @@ export function transformToSimStudioWorkflow(
       id: `${exp.id}-agent`,
       name: `${exp.name} Agent`,
       type: 'developer',
-      capabilities: [
-        'code_generation',
-        'testing',
-        'documentation',
-        'code_review'
-      ],
+      capabilities: {
+        code_generation: true,
+        testing: true,
+        documentation: true,
+        code_review: true,
+        debugging: exp.risk !== 'high', // Disable debugging for high risk experiments
+        refactoring: exp.risk === 'low' // Only enable for low risk experiments
+      },
       configuration: {
         velocity: exp.velocity,
         qualityThreshold: exp.qualityScore,
@@ -99,10 +164,12 @@ export function transformToSimStudioWorkflow(
     for (let i = 0; i < exp.totalTasks; i++) {
       const taskId = `${exp.id}-task-${i}`;
       const isCompleted = i < exp.tasksCompleted;
-      
+      const taskType = i % 3 === 0 ? NodeTypes.ACTION : 
+                      i % 3 === 1 ? NodeTypes.TOOL : NodeTypes.CONDITION;
+                      
       nodes.push({
         id: taskId,
-        type: 'action',
+        type: taskType,
         label: `Task ${i + 1}`,
         position: { x: 150 + index * 300, y: 200 + i * 40 },
         config: {
@@ -119,20 +186,43 @@ export function transformToSimStudioWorkflow(
         id: `${exp.id}-to-${taskId}`,
         source: exp.id,
         target: taskId,
-        type: 'flow',
+        type: EdgeTypes.FLOW,
         config: {
           condition: 'sequential',
           weight: 1
         }
       });
     }
+    
+    // Connect the workflow entry to each experiment
+    edges.push({
+      id: `entry-to-${exp.id}`,
+      source: 'workflow-entry',
+      target: exp.id,
+      type: EdgeTypes.FLOW,
+      config: {
+        description: 'Starts the experiment workflow'
+      }
+    });
+    
+    // Connect the last task of each experiment to the workflow exit
+    const lastTaskId = `${exp.id}-task-${exp.totalTasks - 1}`;
+    edges.push({
+      id: `${lastTaskId}-to-exit`,
+      source: lastTaskId,
+      target: 'workflow-exit',
+      type: EdgeTypes.FLOW,
+      config: {
+        description: 'Completes the experiment workflow'
+      }
+    });
   });
 
-  // Add decision nodes for experiment comparison
+  // 4. Add decision node for experiment comparison
   if (Object.keys(experiments).length > 1) {
     nodes.push({
       id: 'experiment-comparison',
-      type: 'decision',
+      type: NodeTypes.DECISION,
       label: 'Compare Results',
       position: { x: 400, y: 400 },
       config: {
@@ -148,7 +238,7 @@ export function transformToSimStudioWorkflow(
         id: `${expId}-to-comparison`,
         source: expId,
         target: 'experiment-comparison',
-        type: 'data',
+        type: EdgeTypes.DATA,
         config: {
           dataType: 'experiment_results'
         }
@@ -160,13 +250,26 @@ export function transformToSimStudioWorkflow(
     id: `workflow-${Date.now()}`,
     name: projectName,
     description: 'Parallel development experiments workflow',
+    version: '1.0.0',
     nodes,
     edges,
     agents,
     metadata: {
       created: new Date().toISOString(),
       lastModified: new Date().toISOString(),
-      version: '1.0.0'
+      author: 'Dev Workflow Orchestrator',
+      tags: ['development', 'parallel-experiments', 'automation'],
+      settings: {
+        execution: {
+          timeout: 3600, // 1 hour timeout
+          retryCount: 3,
+          concurrencyLimit: 5
+        },
+        monitoring: {
+          logLevel: 'info',
+          metrics: ['duration', 'cost', 'quality']
+        }
+      }
     }
   };
 }
@@ -285,15 +388,33 @@ export function createSimStudioAgents(experiments: Record<string, ExperimentPath
 
   // Add analyzer agent for comparison
   agents.push({
+    id: 'quality-analyzer',
+    name: 'Quality Analysis Agent',
+    type: 'analyzer',
+    capabilities: {
+      performance_analysis: true,
+      quality_assessment: true,
+      risk_evaluation: true,
+      recommendation_generation: true
+    },
+    configuration: {
+      analysisFramework: 'software_quality',
+      metrics: ['reliability', 'maintainability', 'testability', 'performance'],
+      reportingLevel: 'detailed'
+    }
+  });
+
+  // Add analyzer agent for comparison
+  agents.push({
     id: 'experiment-analyzer',
     name: 'Experiment Analyzer',
     type: 'analyzer',
-    capabilities: [
-      'performance_analysis',
-      'quality_assessment',
-      'risk_evaluation',
-      'recommendation_generation'
-    ],
+    capabilities: {
+      performance_analysis: true,
+      quality_assessment: true,
+      risk_evaluation: true,
+      recommendation_generation: true
+    },
     configuration: {
       analysisFramework: 'multi_criteria',
       metrics: ['velocity', 'quality', 'coverage', 'risk'],
@@ -302,6 +423,70 @@ export function createSimStudioAgents(experiments: Record<string, ExperimentPath
   });
 
   return agents;
+}
+
+/**
+ * Handles a node interaction from the SimStudio workflow
+ */
+export function handleSimStudioNodeInteraction(
+  event: GraphInteractionEvent, 
+  workflow: SimStudioWorkflow
+): { message: string, details: any } {
+  const { nodeId, type } = event;
+  
+  if (!nodeId || type !== 'node-click') {
+    return { message: 'No action required', details: null };
+  }
+  
+  const node = workflow.nodes.find(n => n.id === nodeId);
+  
+  if (!node) {
+    return { message: 'Node not found', details: null };
+  }
+  
+  // Generate response based on node type
+  switch (node.type) {
+    case NodeTypes.AGENT:
+      const agent = workflow.agents.find(a => a.id === `${node.id}-agent`);
+      return {
+        message: `Agent details for ${node.label}`,
+        details: {
+          agent: agent,
+          config: node.config,
+          capabilities: agent?.capabilities
+        }
+      };
+      
+    case NodeTypes.ACTION:
+      return {
+        message: `Action details for ${node.label}`,
+        details: {
+          actionType: 'development_task',
+          config: node.config,
+          status: node.status
+        }
+      };
+      
+    case NodeTypes.DECISION:
+      const connectedEdges = workflow.edges.filter(e => e.target === node.id);
+      return {
+        message: `Decision point details for ${node.label}`,
+        details: {
+          criteria: node.config.criteria,
+          inputSources: connectedEdges.map(e => e.source),
+          decisionLogic: 'multi_criteria_evaluation'
+        }
+      };
+      
+    default:
+      return {
+        message: `Details for ${node.label}`,
+        details: {
+          type: node.type,
+          config: node.config
+        }
+      };
+  }
 }
 
 /**

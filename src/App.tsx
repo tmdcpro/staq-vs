@@ -6,7 +6,7 @@ import { ProjectOverview } from './components/ProjectOverview';
 import { DAGVisualization } from './components/DAGVisualization';
 import { SimStudioIntegration } from './components/SimStudioIntegration';
 import { VelocityChart } from './components/VelocityChart';
-import { QualityTrend } from './components/QualityTrend';
+import { QualityTrend } from './components/QualityTrend'; 
 import { ResourceAllocation } from './components/ResourceAllocation';
 import { RecentEvents } from './components/RecentEvents';
 import { useDevWorkflowData } from './hooks/useDevWorkflowData';
@@ -14,6 +14,8 @@ import { useDevWorkflowData } from './hooks/useDevWorkflowData';
 export function App() {
   const [darkMode, setDarkMode] = React.useState(true);
   const data = useDevWorkflowData();
+
+  const [selectedTab, setSelectedTab] = React.useState<'dag' | 'simstudio'>('dag');
 
   React.useEffect(() => {
     if (darkMode) {
@@ -108,19 +110,42 @@ export function App() {
               onTogglePause={handleToggleExperiment}
             />
           ))}
-        </div>
-
-        {/* Analytics Charts */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <VelocityChart data={data.dailyVelocity} />
-          <QualityTrend data={data.qualityTrend} />
-        </div>
-
-        {/* Bottom Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <ResourceAllocation data={data.resourceAllocation} />
-          <RecentEvents events={data.recentEvents} />
-        </div>
+      <div className="flex mb-4 border-b border-gray-200 dark:border-gray-700">
+        <button
+          className={`py-2 px-4 ${selectedTab === 'dag' 
+            ? 'border-b-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light font-medium' 
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+          onClick={() => setSelectedTab('dag')}
+        >
+          Current Visualization
+        </button>
+        <button
+          className={`py-2 px-4 ${selectedTab === 'simstudio' 
+            ? 'border-b-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light font-medium' 
+            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+          onClick={() => setSelectedTab('simstudio')}
+        >
+          SimStudio Integration
+        </button>
+      </div>
+      
+      <div className="grid grid-cols-1 gap-6">
+        {selectedTab === 'dag' ? (
+          <DAGVisualization
+            onNodeInteraction={(event) => {
+              console.log('Node interaction:', event);
+              // Handle node interactions - could open experiment details, etc.
+            }}
+          />
+        ) : (
+          <SimStudioIntegration
+            initialWorkflow={data.experiments}
+            onWorkflowChange={(workflow) => {
+              console.log('SimStudio workflow updated:', workflow);
+              // Handle workflow changes
+            }}
+          />
+        )}
       </main>
     </div>
   );
