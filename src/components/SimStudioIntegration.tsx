@@ -23,6 +23,7 @@ export function SimStudioIntegration({
   const [showImportModal, setShowImportModal] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [isCreating, setIsCreating] = useState(false);
+  const [showWorkflowVisualization, setShowWorkflowVisualization] = useState(false);
   const [integrationStatus, setIntegrationStatus] = useState<'connecting' | 'ready' | 'running' | 'completed'>('connecting');
   const workflowData = useDevWorkflowData();
 
@@ -82,6 +83,7 @@ export function SimStudioIntegration({
             // Simulate a workflow execution after import
             setTimeout(() => {
               setIntegrationStatus('completed');
+              setShowWorkflowVisualization(true);
             }, 3000);
           }, 500);
           return 100;
@@ -103,6 +105,7 @@ export function SimStudioIntegration({
     // Simulate a workflow execution
     setTimeout(() => {
       setIntegrationStatus('completed');
+      setShowWorkflowVisualization(true);
     }, 3000);
   };
   
@@ -381,6 +384,7 @@ export function SimStudioIntegration({
                       setIntegrationStatus('running');
                       setTimeout(() => {
                         setIntegrationStatus('completed');
+                        setShowWorkflowVisualization(true);
                       }, 2000);
                     }, 1000);
                   }}
@@ -454,6 +458,111 @@ export function SimStudioIntegration({
           </div>
         )}
 
+        {/* Workflow Visualization (shown after completion) */}
+        {showWorkflowVisualization && activeExperiment && (
+          <div className="mt-4 p-6 border-t border-gray-200 dark:border-gray-700">
+            <h4 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+              Workflow Visualization
+            </h4>
+            
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 overflow-auto" style={{ height: '400px' }}>
+              <div className="relative" style={{ width: '800px', height: '350px' }}>
+                {/* Workflow Nodes */}
+                <div className="absolute top-20 left-50 w-32 h-16 bg-purple-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Start
+                </div>
+                
+                <svg width="800" height="350" className="absolute top-0 left-0 w-full h-full">
+                  <path d="M82 36 L150 100" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M182 100 L250 36" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M282 36 L350 100" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M382 100 L450 36" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M482 36 L550 100" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M582 100 L650 170" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M650 202 L550 250" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M518 250 L400 250" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M368 250 L250 250" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  <path d="M218 250 L150 170" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
+                  
+                  <defs>
+                    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                      <polygon points="0 0, 10 3.5, 0 7" fill="#6366F1" />
+                    </marker>
+                  </defs>
+                </svg>
+                
+                <div className="absolute top-100 left-150 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Setup
+                </div>
+                
+                <div className="absolute top-20 left-250 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Code Gen
+                </div>
+                
+                <div className="absolute top-100 left-350 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Tests
+                </div>
+                
+                <div className="absolute top-20 left-450 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Review
+                </div>
+                
+                <div className="absolute top-100 left-550 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Build
+                </div>
+                
+                <div className="absolute top-170 left-650 w-32 h-16 bg-green-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Deploy
+                </div>
+                
+                <div className="absolute top-250 left-550 w-32 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Monitor
+                </div>
+                
+                <div className="absolute top-250 left-400 w-32 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Analyze
+                </div>
+                
+                <div className="absolute top-250 left-250 w-32 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  Feedback
+                </div>
+                
+                <div className="absolute top-170 left-150 w-32 h-16 bg-red-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
+                  End
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Total Nodes</div>
+                <div className="text-xl font-bold">10</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Execution Time</div>
+                <div className="text-xl font-bold">2.3s</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Success Rate</div>
+                <div className="text-xl font-bold">100%</div>
+              </div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+                <div className="text-sm text-gray-500 dark:text-gray-400">Memory Usage</div>
+                <div className="text-xl font-bold">128 MB</div>
+              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={() => window.open('https://simstudio.ai/docs', '_blank')}
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-md"
+              >
+                Open in Full Editor
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Integration Status */}
         <div className="px-6 pb-6">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -487,6 +596,7 @@ export function SimStudioIntegration({
                       onClick={() => {
                         setActiveExperiment(null);
                         setIntegrationStatus('ready');
+                        setShowWorkflowVisualization(false);
                       }}
                       className="text-purple-600 dark:text-purple-400 hover:underline"
                     >
