@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { ExperimentPath } from './components/ExperimentPath';
 import { ProjectOverview } from './components/ProjectOverview';
 import { DAGVisualization } from './components/DAGVisualization';
+import { SimStudioIntegration } from './components/SimStudioIntegration';
 import { VelocityChart } from './components/VelocityChart';
 import { QualityTrend } from './components/QualityTrend';
 import { ResourceAllocation } from './components/ResourceAllocation';
@@ -81,12 +82,20 @@ export function App() {
 
         {/* DAG Visualization */}
         <div className="mb-6">
-          <DAGVisualization
-            onNodeInteraction={(event) => {
-              console.log('Node interaction:', event);
-              // Handle node interactions - could open experiment details, etc.
-            }}
-          />
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <DAGVisualization
+              onNodeInteraction={(event) => {
+                console.log('Node interaction:', event);
+                // Handle node interactions - could open experiment details, etc.
+              }}
+            />
+            <SimStudioIntegration
+              onWorkflowChange={(workflow) => {
+                console.log('SimStudio workflow updated:', workflow);
+                // Handle workflow changes
+              }}
+            />
+          </div>
         </div>
 
         {/* Experiment Paths */}
