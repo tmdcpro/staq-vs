@@ -10,13 +10,11 @@ import { useDevWorkflowData } from '../hooks/useDevWorkflowData';
 interface SimStudioIntegrationProps {
   onWorkflowChange?: (workflow: any) => void;
   initialWorkflow?: any;
-  initialWorkflow?: any;
 }
 
 export function SimStudioIntegration({
   onWorkflowChange,
   initialWorkflow
-  initialWorkflow 
 }: SimStudioIntegrationProps) {
   const [isSimStudioLoaded, setIsSimStudioLoaded] = useState(false);
   const [simulationMode, setSimulationMode] = useState(true);
