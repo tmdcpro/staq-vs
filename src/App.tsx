@@ -110,42 +110,44 @@ export function App() {
               onTogglePause={handleToggleExperiment}
             />
           ))}
-      <div className="flex mb-4 border-b border-gray-200 dark:border-gray-700">
-        <button
-          className={`py-2 px-4 ${selectedTab === 'dag' 
-            ? 'border-b-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light font-medium' 
-            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
-          onClick={() => setSelectedTab('dag')}
-        >
-          Current Visualization
-        </button>
-        <button
-          className={`py-2 px-4 ${selectedTab === 'simstudio' 
-            ? 'border-b-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light font-medium' 
-            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
-          onClick={() => setSelectedTab('simstudio')}
-        >
-          SimStudio Integration
-        </button>
-      </div>
+        </div>
+        <div className="flex mb-4 border-b border-gray-200 dark:border-gray-700">
+          <button
+            className={`py-2 px-4 ${selectedTab === 'dag' 
+              ? 'border-b-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light font-medium' 
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            onClick={() => setSelectedTab('dag')}
+          >
+            Current Visualization
+          </button>
+          <button
+            className={`py-2 px-4 ${selectedTab === 'simstudio' 
+              ? 'border-b-2 border-primary-DEFAULT text-primary-DEFAULT dark:text-primary-light font-medium' 
+              : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            onClick={() => setSelectedTab('simstudio')}
+          >
+            SimStudio Integration
+          </button>
+        </div>
       
-      <div className="grid grid-cols-1 gap-6">
-        {selectedTab === 'dag' ? (
-          <DAGVisualization
-            onNodeInteraction={(event) => {
-              console.log('Node interaction:', event);
-              // Handle node interactions - could open experiment details, etc.
-            }}
-          />
-        ) : (
-          <SimStudioIntegration
-            initialWorkflow={data.experiments}
-            onWorkflowChange={(workflow) => {
-              console.log('SimStudio workflow updated:', workflow);
-              // Handle workflow changes
-            }}
-          />
-        )}
+        <div className="grid grid-cols-1 gap-6">
+          {selectedTab === 'dag' ? (
+            <DAGVisualization
+              onNodeInteraction={(event) => {
+                console.log('Node interaction:', event);
+                // Handle node interactions - could open experiment details, etc.
+              }}
+            />
+          ) : (
+            <SimStudioIntegration
+              initialWorkflow={data.experiments}
+              onWorkflowChange={(workflow) => {
+                console.log('SimStudio workflow updated:', workflow);
+                // Handle workflow changes
+              }}
+            />
+          )}
+        </div>
       </main>
     </div>
   );
