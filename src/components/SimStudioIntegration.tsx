@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Workflow, Code, GitBranch, Zap, Play, CheckCircle, Database } from 'lucide-react';
+import { Workflow, Code, GitBranch, Zap, Play, CheckCircle, Database, Upload, Plus } from 'lucide-react';
 import { transformToSimStudioWorkflow, transformFromSimStudioWorkflow } from '../utils/simStudioTransforms';
 import { useDevWorkflowData } from '../hooks/useDevWorkflowData';
 
@@ -19,6 +19,10 @@ export function SimStudioIntegration({
   const [isSimStudioLoaded, setIsSimStudioLoaded] = useState(false);
   const [simulationMode, setSimulationMode] = useState(true);
   const [activeExperiment, setActiveExperiment] = useState<string | null>(null);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importProgress, setImportProgress] = useState(0);
+  const [isCreating, setIsCreating] = useState(false);
   const [integrationStatus, setIntegrationStatus] = useState<'connecting' | 'ready' | 'running' | 'completed'>('connecting');
   const workflowData = useDevWorkflowData();
 
@@ -43,7 +47,9 @@ export function SimStudioIntegration({
     };
 
     loadSimStudio();
+  }, []);
 
+  useEffect(() => {
     // When we have initial workflow data, transform it to SimStudio format
     if (initialWorkflow && isSimStudioLoaded) {
       const simStudioWorkflow = transformToSimStudioWorkflow(workflowData.experiments);
@@ -54,6 +60,41 @@ export function SimStudioIntegration({
       }
     }
   }, [initialWorkflow, isSimStudioLoaded, onWorkflowChange, workflowData.experiments]);
+  
+  const handleCreateWorkflow = () => {
+    setShowCreateModal(true);
+  };
+  
+  const handleImportPRD = () => {
+    setShowImportModal(true);
+    
+    // Simulate import progress
+    setImportProgress(0);
+    const interval = setInterval(() => {
+      setImportProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            setShowImportModal(false);
+            setActiveExperiment('exp-001'); // Set the first experiment as active after import
+            setIntegrationStatus('running');
+            
+            // Simulate a workflow execution after import
+            setTimeout(() => {
+              setIntegrationStatus('completed');
+            }, 3000);
+          }, 500);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 300);
+  };
+  
+  const closeModals = () => {
+    setShowCreateModal(false);
+    setShowImportModal(false);
+  };
   
   const handleExperimentSelect = (experimentId: string) => {
     setActiveExperiment(experimentId);
@@ -261,29 +302,157 @@ export function SimStudioIntegration({
                   whileTap={{ scale: 0.95 }}
                   className={`px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 ${activeExperiment ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={activeExperiment !== null}
-                  onClick={() => {
-                    // This will be replaced with actual SimStudio workflow creation
-                    console.log('Creating new SimStudio workflow...');
-                  }}
+                  onClick={handleCreateWorkflow}
                 >
-                  Create Workflow
+                  <span className="flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    Create Workflow
+                  </span>
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg font-medium shadow hover:shadow-lg transition-all duration-200 ${activeExperiment ? 'opacity-50 cursor-not-allowed' : ''}`}
                   disabled={activeExperiment !== null}
-                  onClick={() => {
-                    // This will be replaced with SimStudio import functionality
-                    console.log('Importing PRD to SimStudio...');
-                  }}
+                  onClick={handleImportPRD}
                 >
-                  Import PRD
+                  <span className="flex items-center gap-2">
+                    <Upload className="h-4 w-4" />
+                    Import PRD
+                  </span>
                 </motion.button>
               </div>
             </div>
           </div>
         </div>
+
+        {/* Create Workflow Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Create New Workflow</h3>
+                <button onClick={closeModals} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Workflow Name</label>
+                <input 
+                  type="text"
+                  className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600"
+                  placeholder="Enter workflow name"
+                  defaultValue="New Development Experiment"
+                />
+              </div>
+              
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Template</label>
+                <select className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600">
+                  <option>Code Generation Workflow</option>
+                  <option>Feature Development</option>
+                  <option>Bug Fix Automation</option>
+                  <option>Testing Pipeline</option>
+                  <option>Empty Workflow</option>
+                </select>
+              </div>
+              
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={closeModals}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setIsCreating(true);
+                    setTimeout(() => {
+                      setIsCreating(false);
+                      setShowCreateModal(false);
+                      setActiveExperiment('exp-002');
+                      setIntegrationStatus('running');
+                      setTimeout(() => {
+                        setIntegrationStatus('completed');
+                      }, 2000);
+                    }, 1000);
+                  }}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center"
+                  disabled={isCreating}
+                >
+                  {isCreating ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Creating...
+                    </>
+                  ) : (
+                    'Create Workflow'
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+        
+        {/* Import PRD Modal */}
+        {showImportModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-lg w-full"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Import PRD</h3>
+                <button onClick={closeModals} className="text-gray-500 hover:text-gray-700">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              {importProgress < 100 ? (
+                <>
+                  <div className="mb-4">
+                    <p className="text-gray-600 dark:text-gray-400 mb-2">Importing PRD and generating workflow...</p>
+                    <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+                      <div 
+                        className="bg-purple-600 h-2.5 rounded-full transition-all duration-300" 
+                        style={{ width: `${importProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                      {importProgress < 30 ? 'Analyzing document structure...' : 
+                       importProgress < 60 ? 'Extracting requirements and deliverables...' :
+                       importProgress < 90 ? 'Generating workflow nodes and connections...' :
+                       'Finalizing workflow model...'}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="mb-4 flex justify-center">
+                    <div className="rounded-full bg-green-100 p-3">
+                      <CheckCircle className="h-6 w-6 text-green-600" />
+                    </div>
+                  </div>
+                  <p className="font-medium text-gray-900 dark:text-white">PRD Successfully Imported</p>
+                  <p className="text-gray-500 dark:text-gray-400 mt-1">Your workflow has been created from the PRD</p>
+                </div>
+              )}
+            </motion.div>
+          </div>
+        )}
 
         {/* Integration Status */}
         <div className="px-6 pb-6">
