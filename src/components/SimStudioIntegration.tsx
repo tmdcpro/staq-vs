@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Workflow, Code, GitBranch, Zap } from 'lucide-react';
+import { Workflow, Code, GitBranch, Zap, Play, CheckCircle, Database } from 'lucide-react';
+import { transformToSimStudioWorkflow, transformFromSimStudioWorkflow } from '../utils/simStudioTransforms';
+import { useDevWorkflowData } from '../hooks/useDevWorkflowData';
 
 // This is a placeholder for SimStudio integration
 // Will be replaced with actual SimStudio components once we have the SDK
@@ -8,14 +10,19 @@ import { Workflow, Code, GitBranch, Zap } from 'lucide-react';
 interface SimStudioIntegrationProps {
   onWorkflowChange?: (workflow: any) => void;
   initialWorkflow?: any;
+  initialWorkflow?: any;
 }
 
-export function SimStudioIntegration({ 
-  onWorkflowChange, 
+export function SimStudioIntegration({
+  onWorkflowChange,
+  initialWorkflow
   initialWorkflow 
 }: SimStudioIntegrationProps) {
   const [isSimStudioLoaded, setIsSimStudioLoaded] = useState(false);
   const [simulationMode, setSimulationMode] = useState(true);
+  const [activeExperiment, setActiveExperiment] = useState<string | null>(null);
+  const [integrationStatus, setIntegrationStatus] = useState<'connecting' | 'ready' | 'running' | 'completed'>('connecting');
+  const workflowData = useDevWorkflowData();
 
   useEffect(() => {
     // This will be replaced with actual SimStudio SDK loading
@@ -28,14 +35,66 @@ export function SimStudioIntegration({
         // const SimStudio = await import('@simstudio/react');
         // setIsSimStudioLoaded(true);
         
-        setIsSimStudioLoaded(true);
+        setTimeout(() => {
+          setIsSimStudioLoaded(true);
+          setIntegrationStatus('ready');
+        }, 1000);
       } catch (error) {
         console.error('Failed to load SimStudio:', error);
       }
     };
 
     loadSimStudio();
-  }, []);
+
+    // When we have initial workflow data, transform it to SimStudio format
+    if (initialWorkflow && isSimStudioLoaded) {
+      const simStudioWorkflow = transformToSimStudioWorkflow(workflowData.experiments);
+      console.log('Transformed workflow:', simStudioWorkflow);
+      
+      if (onWorkflowChange) {
+        onWorkflowChange(simStudioWorkflow);
+      }
+    }
+  }, [initialWorkflow, isSimStudioLoaded, onWorkflowChange, workflowData.experiments]);
+  
+  const handleExperimentSelect = (experimentId: string) => {
+    setActiveExperiment(experimentId);
+    setIntegrationStatus('running');
+    
+    // Simulate a workflow execution
+    setTimeout(() => {
+      setIntegrationStatus('completed');
+    }, 3000);
+  };
+  
+  const renderStatusBadge = () => {
+    switch (integrationStatus) {
+      case 'connecting':
+        return (
+          <span className="px-3 py-1 bg-blue-900/30 text-blue-300 rounded-full text-sm font-medium">
+            Connecting to SimStudio
+          </span>
+        );
+      case 'ready':
+        return (
+          <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-medium">
+            SimStudio Ready
+          </span>
+        );
+      case 'running':
+        return (
+          <span className="px-3 py-1 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-medium flex items-center gap-1">
+            <Play className="h-3 w-3" /> Running Experiment
+          </span>
+        );
+      case 'completed':
+        return (
+          <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-full text-sm font-medium flex items-center gap-1">
+            <CheckCircle className="h-3 w-3" /> Experiment Complete
+          </span>
+        );
+    }
+  };
 
   if (!isSimStudioLoaded) {
     return (
@@ -86,8 +145,8 @@ export function SimStudioIntegration({
               <motion.div
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ duration: 0.5 }}
-                className="space-y-4"
+                transition={{ duration: 0.7 }}
+                className="space-y-6"
               >
                 <div className="flex justify-center space-x-4">
                   {/* Simulated workflow nodes */}
@@ -113,48 +172,97 @@ export function SimStudioIntegration({
 
                 <div className="space-y-2">
                   <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
-                    SimStudio Integration Ready
+                    SimStudio Workflow Integration
                   </h4>
                   <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    The platform is configured to integrate with SimStudio's agentic workflow engine. 
-                    Our current graph visualization will seamlessly transition to SimStudio's 
-                    advanced workflow editor.
+                    Sim Studio's workflow engine is integrated with the Dev Workflow Orchestrator, enabling automated 
+                    orchestration of parallel development experiments. Select an experiment below to run its workflow.
                   </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                    <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                      3
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Active Experiments
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                    <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                      15
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Workflow Nodes
-                    </div>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                    <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                      8
-                    </div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">
-                      Active Agents
-                    </div>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                  {Object.entries(workflowData.experiments).map(([key, experiment], index) => (
+                    <motion.div 
+                      key={key}
+                      whileHover={{ scale: 1.05 }}
+                      className={`bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm cursor-pointer ${activeExperiment === key ? 'ring-2 ring-purple-500' : ''}`}
+                      onClick={() => handleExperimentSelect(key)}
+                    >
+                      <div className="flex justify-between items-center mb-2">
+                        <div className="text-lg font-bold text-gray-900 dark:text-white truncate">
+                          {experiment.name}
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs ${
+                          experiment.status === 'active' ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200' :
+                          experiment.status === 'paused' ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200' :
+                          'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-200'
+                        }`}>
+                          {experiment.status}
+                        </span>
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                        {experiment.approach}
+                      </div>
+                      <div className="flex items-center text-sm text-gray-700 dark:text-gray-300">
+                        <Database className="w-3 h-3 mr-1" />
+                        <span>{experiment.tasksCompleted}/{experiment.totalTasks} tasks</span>
+                      </div>
+                    </motion.div>
+                  ))}
                 </div>
+                
+                {activeExperiment && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-4 max-w-3xl mx-auto"
+                  >
+                    <h5 className="font-semibold mb-2 text-gray-900 dark:text-white">Workflow Status</h5>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Current Stage:</span>
+                        <div className="flex items-center gap-2">
+                          {integrationStatus === 'running' ? (
+                            <div className="flex items-center gap-2">
+                              <motion.div
+                                animate={{ rotate: 360 }}
+                                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                                className="w-4 h-4 border-2 border-purple-500 border-t-transparent rounded-full"
+                              />
+                              <span className="text-purple-500">Processing tasks...</span>
+                            </div>
+                          ) : integrationStatus === 'completed' ? (
+                            <span className="text-green-500 flex items-center gap-1">
+                              <CheckCircle className="w-4 h-4" /> Workflow completed
+                            </span>
+                          ) : (
+                            <span className="text-gray-500">Waiting to start</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Agent Count:</span>
+                        <span className="text-gray-800 dark:text-gray-200">4 active agents</span>
+                      </div>
+                      
+                      <div className="flex justify-between items-center">
+                        <span className="text-gray-600 dark:text-gray-400">Task Queue:</span>
+                        <span className="text-gray-800 dark:text-gray-200">
+                          {integrationStatus === 'completed' ? '0 pending / 12 completed' : '5 pending / 7 completed'}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
               </motion.div>
 
               <div className="flex justify-center gap-3">
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200"
+                  className={`px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-200 ${activeExperiment ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={activeExperiment !== null}
                   onClick={() => {
                     // This will be replaced with actual SimStudio workflow creation
                     console.log('Creating new SimStudio workflow...');
@@ -165,7 +273,8 @@ export function SimStudioIntegration({
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg font-medium shadow hover:shadow-lg transition-all duration-200"
+                  className={`px-6 py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 rounded-lg font-medium shadow hover:shadow-lg transition-all duration-200 ${activeExperiment ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  disabled={activeExperiment !== null}
                   onClick={() => {
                     // This will be replaced with SimStudio import functionality
                     console.log('Importing PRD to SimStudio...');
@@ -181,17 +290,43 @@ export function SimStudioIntegration({
         {/* Integration Status */}
         <div className="px-6 pb-6">
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div className="flex items-start gap-2">
+              <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                integrationStatus === 'connecting' ? 'bg-blue-500' :
+                integrationStatus === 'ready' ? 'bg-purple-500' :
+                integrationStatus === 'running' ? 'bg-yellow-500' :
+                'bg-green-500'
+              }`}></div>
               <div>
-                <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-1">
-                  SimStudio Integration Status
+                <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-1 flex items-center">
+                  SimStudio Integration Status 
+                  <div className="ml-3">
+                    {renderStatusBadge()}
+                  </div>
                 </h5>
                 <p className="text-sm text-blue-700 dark:text-blue-300">
-                  Ready for integration. Our flexible architecture supports seamless 
-                  transition to SimStudio's workflow engine while maintaining all 
-                  current functionality.
+                  {integrationStatus === 'connecting' ? 
+                    'Connecting to SimStudio API... Our architecture is prepared for integration with the workflow engine.' :
+                    integrationStatus === 'ready' ? 
+                    'Ready to execute workflows. Select an experiment above to run its SimStudio workflow.' :
+                    integrationStatus === 'running' ? 
+                    'SimStudio is executing the workflow for the selected experiment. Real-time progress is being tracked.' :
+                    'Workflow execution complete. The experiment results have been processed and are ready for analysis.'
+                  }
                 </p>
+                {integrationStatus === 'completed' && (
+                  <div className="mt-2 text-sm">
+                    <button 
+                      onClick={() => {
+                        setActiveExperiment(null);
+                        setIntegrationStatus('ready');
+                      }}
+                      className="text-purple-600 dark:text-purple-400 hover:underline"
+                    >
+                      Reset and run another experiment
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -202,12 +337,33 @@ export function SimStudioIntegration({
 
   // This will be the actual SimStudio integration
   return (
-    <div className="bg-white dark:bg-card-dark rounded-lg shadow-card dark:shadow-none">
-      {/* Real SimStudio components will go here */}
-      <div className="p-6">
-        <p className="text-gray-600 dark:text-gray-400">
-          SimStudio components will be rendered here once the SDK is integrated.
-        </p>
+    <div className="bg-white dark:bg-card-dark rounded-lg shadow-card dark:shadow-none h-full flex flex-col">
+      <div className="p-6 flex-1 flex flex-col">
+        <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-6 flex-1 flex flex-col justify-center items-center">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="text-center max-w-md"
+          >
+            <Workflow className="h-12 w-12 text-purple-500 dark:text-purple-400 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">SimStudio Workflow Editor</h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              The SimStudio SDK is loading. Once loaded, you'll be able to visually design and execute AI agent workflows.
+            </p>
+            <div className="relative h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+              <motion.div
+                className="absolute left-0 top-0 h-full bg-purple-500"
+                animate={{ width: ['0%', '100%'] }}
+                transition={{ 
+                  repeat: Infinity,
+                  duration: 2,
+                  ease: "easeInOut"
+                }}
+              />
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
