@@ -10,6 +10,7 @@ interface PRDSelectionModalProps {
 
 export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelectionModalProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [recentPRDs, setRecentPRDs] = useState([
     { name: 'PROJECT_REQUIREMENTS.md', path: '/home/user/projects/dwo/PROJECT_REQUIREMENTS.md', lastModified: '2024-06-28' },
     { name: 'E-Commerce Platform PRD.md', path: '/home/user/projects/ecommerce/PRD.md', lastModified: '2024-06-20' },
@@ -20,6 +21,10 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
     if (event.target.files && event.target.files[0]) {
       setSelectedFile(event.target.files[0]);
     }
+  };
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleImport = () => {
@@ -64,13 +69,14 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
             <h3 className="text-sm font-medium mb-2 text-gray-700 dark:text-gray-300">Import PRD</h3>
             <div className="border-2 border-dashed rounded-lg p-6 border-gray-300 dark:border-gray-600 text-center">
               <input
+                ref={fileInputRef}
                 type="file"
                 id="prd-file"
                 accept=".md,.txt,.pdf,.json"
                 onChange={handleFileChange}
-                className="hidden"
+                className="sr-only"
               />
-              <label htmlFor="prd-file" className="cursor-pointer">
+              <div className="cursor-pointer" onClick={handleFileButtonClick}>
                 {selectedFile ? (
                   <div className="flex items-center justify-center">
                     <File className="h-8 w-8 text-primary-DEFAULT mb-2" />
@@ -87,7 +93,14 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
                     </span>
                   </div>
                 )}
-              </label>
+              </div>
+              <button
+                type="button"
+                onClick={handleFileButtonClick}
+                className="mt-3 px-4 py-2 bg-primary-DEFAULT hover:bg-primary-dark text-white rounded-md transition-colors"
+              >
+                Choose File
+              </button>
             </div>
           </div>
 
