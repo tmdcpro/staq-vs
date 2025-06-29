@@ -162,14 +162,16 @@ export function App() {
         </div>
       
         <div className="grid grid-cols-1 gap-6">
-          {selectedTab === 'dag' ? (
+          {selectedTab === 'dag' && (
             <DAGVisualization
               onNodeInteraction={(event) => {
                 console.log('Node interaction:', event);
                 // Handle node interactions - could open experiment details, etc.
               }}
             />
-          ) : (
+          )}
+          
+          {selectedTab === 'simstudio' && (
             <SimStudioIntegration
               initialWorkflow={data.experiments}
               onWorkflowChange={(workflow) => {
@@ -178,6 +180,12 @@ export function App() {
               }}
             />
           )}
+          
+          {/* Task List - New Component */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+            <TaskList className="lg:col-span-2" />
+            <RecentEvents events={data.recentEvents} />
+          </div>
         </div>
       </main>
     </div>

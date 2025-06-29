@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Workflow, Code, GitBranch, Zap, Play, CheckCircle, Database, Upload, Plus } from 'lucide-react';
 import { transformToSimStudioWorkflow, transformFromSimStudioWorkflow } from '../utils/simStudioTransforms';
 import { useDevWorkflowData } from '../hooks/useDevWorkflowData';
+import { ExperimentPath } from '../hooks/useDevWorkflowData';
 
 // This is a placeholder for SimStudio integration
 // Will be replaced with actual SimStudio components once we have the SDK
@@ -23,6 +24,7 @@ export function SimStudioIntegration({
   const [showImportModal, setShowImportModal] = useState(false);
   const [importProgress, setImportProgress] = useState(0);
   const [isCreating, setIsCreating] = useState(false);
+  const [generatedWorkflowData, setGeneratedWorkflowData] = useState<ExperimentPath[]>([]);
   const [showWorkflowVisualization, setShowWorkflowVisualization] = useState(false);
   const [integrationStatus, setIntegrationStatus] = useState<'connecting' | 'ready' | 'running' | 'completed'>('connecting');
   const workflowData = useDevWorkflowData();
@@ -55,7 +57,8 @@ export function SimStudioIntegration({
     if (initialWorkflow && isSimStudioLoaded) {
       const simStudioWorkflow = transformToSimStudioWorkflow(workflowData.experiments);
       console.log('Transformed workflow:', simStudioWorkflow);
-      
+      // Save the workflow data for visualization
+      setGeneratedWorkflowData(Object.values(workflowData.experiments));
       if (onWorkflowChange) {
         onWorkflowChange(simStudioWorkflow);
       }
@@ -84,6 +87,12 @@ export function SimStudioIntegration({
             setTimeout(() => {
               setIntegrationStatus('completed');
               setShowWorkflowVisualization(true);
+              // Create example workflow data from the PRD
+              const workflowItems = Object.values(workflowData.experiments);
+              // In a real app, this would parse the PRD and create a data structure
+              // representing all the items in the PRD as workflow nodes
+              console.log('Generated workflow from PRD:', workflowItems);
+              setGeneratedWorkflowData(workflowItems);
             }, 3000);
           }, 500);
           return 100;
@@ -231,6 +240,7 @@ export function SimStudioIntegration({
                       onClick={() => handleExperimentSelect(key)}
                     >
                       <div className="flex justify-between items-center mb-2">
+                        <span className="inline-block bg-gray-100 dark:bg-gray-800 text-xs px-1 rounded mr-2">{key}</span>
                         <div className="text-lg font-bold text-gray-900 dark:text-white truncate">
                           {experiment.name}
                         </div>
@@ -328,7 +338,7 @@ export function SimStudioIntegration({
             </div>
           </div>
         </div>
-
+            
         {/* Create Workflow Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -465,13 +475,33 @@ export function SimStudioIntegration({
               Workflow Visualization
             </h4>
             
-            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 overflow-auto" style={{ height: '400px' }}>
-              <div className="relative" style={{ width: '800px', height: '350px' }}>
-                {/* Workflow Nodes */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4 overflow-auto relative" style={{ height: '400px' }}>
+              {/* PRD-based workflow visualization */}
+              <div className="flex flex-col absolute left-0 top-0 bottom-0 w-48 border-r border-gray-200 dark:border-gray-700 overflow-y-auto p-2">
+                <h5 className="text-sm font-semibold mb-2 text-gray-800 dark:text-gray-200">PRD Items</h5>
+                {/* PRD items would be dynamically generated from the actual PRD */}
+                <div className="space-y-1 text-xs">
+                  {['F1.1: PRD Import', 'F1.2: Extract Deliverables', 'F1.3: Identify Features', 'F2.1: Generate Dev Plans'].map((item, i) => (
+                    <div key={i} className="p-2 bg-primary-light/10 dark:bg-primary-dark/10 rounded border border-primary-light/20 dark:border-primary-dark/20">
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="relative ml-48" style={{ width: 'calc(100% - 12rem)', height: '350px' }}>
                 <div className="absolute top-20 left-50 w-32 h-16 bg-purple-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
                   Start
                 </div>
                 
+                {/* Main workflow visualization with experiment nodes */}
+                <div className="flex justify-center my-4">
+                  <div className="text-center text-xs text-gray-500 dark:text-gray-400">
+                    <div className="text-sm font-medium text-gray-700 dark:text-gray-300">Mapping PRD items to implementation tasks</div>
+                    <div>Each node represents a task derived from the PRD requirements</div>
+                  </div>
+                </div>
+
                 <svg width="800" height="350" className="absolute top-0 left-0 w-full h-full">
                   <path d="M82 36 L150 100" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
                   <path d="M182 100 L250 36" stroke="#6366F1" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
@@ -490,43 +520,36 @@ export function SimStudioIntegration({
                     </marker>
                   </defs>
                 </svg>
-                
-                <div className="absolute top-100 left-150 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
-                  Setup
-                </div>
-                
-                <div className="absolute top-20 left-250 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
-                  Code Gen
-                </div>
-                
-                <div className="absolute top-100 left-350 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
-                  Tests
-                </div>
-                
-                <div className="absolute top-20 left-450 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
-                  Review
-                </div>
-                
-                <div className="absolute top-100 left-550 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
-                  Build
-                </div>
-                
-                <div className="absolute top-170 left-650 w-32 h-16 bg-green-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
-                  Deploy
-                </div>
-                
+
+                {/* Generated workflow nodes based on experiments - these would be dynamically generated */}
+                {generatedWorkflowData.map((experiment, index) => (
+                  <div 
+                    key={experiment.id}
+                    className={`absolute rounded-lg w-32 h-16 flex items-center justify-center text-white font-medium shadow-lg ${
+                      index === 0 ? 'bg-blue-500 top-100 left-150' : 
+                      index === 1 ? 'bg-blue-500 top-20 left-250' : 
+                      'bg-green-500 top-170 left-650'
+                    }`}
+                  >
+                    {experiment.name.split(' ')[0]}
+                  </div>
+                ))}
+
+                {/* More workflow nodes that would be based on PRD tasks */}
+                <div className="absolute top-100 left-350 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg text-xs">F1.2: Parsing</div>
+                <div className="absolute top-20 left-450 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg text-xs">F1.3: Extract</div>
+                <div className="absolute top-100 left-550 w-32 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg text-xs">F2.1: Generate</div>
+
+                {/* Completed/monitoring tasks */}
                 <div className="absolute top-250 left-550 w-32 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
                   Monitor
                 </div>
-                
                 <div className="absolute top-250 left-400 w-32 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
                   Analyze
                 </div>
-                
                 <div className="absolute top-250 left-250 w-32 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
                   Feedback
                 </div>
-                
                 <div className="absolute top-170 left-150 w-32 h-16 bg-red-500 rounded-lg flex items-center justify-center text-white font-medium shadow-lg">
                   End
                 </div>
@@ -534,16 +557,16 @@ export function SimStudioIntegration({
             </div>
             
             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Total Nodes</div>
                 <div className="text-xl font-bold">10</div>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
                 <div className="text-sm text-gray-500 dark:text-gray-400">Execution Time</div>
                 <div className="text-xl font-bold">2.3s</div>
               </div>
-              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">
-                <div className="text-sm text-gray-500 dark:text-gray-400">Success Rate</div>
+              <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                <div className="text-sm text-gray-500 dark:text-gray-400">PRD Coverage</div>
                 <div className="text-xl font-bold">100%</div>
               </div>
               <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow">

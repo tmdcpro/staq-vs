@@ -8,6 +8,8 @@ interface ProjectOverviewProps {
   activeExperiments: number;
   completedExperiments: number;
   averageVelocity: number;
+  prdPath?: string;
+  currentPhase?: string;
   overallProgress: number;
 }
 
@@ -16,6 +18,8 @@ export function ProjectOverview({
   activeExperiments,
   completedExperiments,
   averageVelocity,
+  prdPath,
+  currentPhase,
   overallProgress
 }: ProjectOverviewProps) {
   return (
@@ -27,15 +31,32 @@ export function ProjectOverview({
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
             Project Overview
+            {prdPath && (
+              <span className="ml-2 text-xs font-normal text-gray-500 dark:text-gray-400 inline-block max-w-xs truncate">
+                {prdPath.split('/').pop()}
+              </span>
+            )}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Dev Workflow Orchestrator Development
+            {currentPhase ? `Phase: ${currentPhase}` : 'Dev Workflow Orchestrator Development'}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <motion.div
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {/* Current Phase Indicator */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="text-center p-4 rounded-lg bg-gradient-to-br from-accent-purple/20 to-accent-pink/20"
+        >
+          <Activity className="h-8 w-8 text-accent-purple mx-auto mb-2" />
+          <div className="text-sm font-semibold text-gray-900 dark:text-white mb-1">Phase</div>
+          <div className="text-xl font-bold text-gray-900 dark:text-white mb-1">{currentPhase || 'Planning'}</div>
+        </motion.div>
+        
+        <motion.div 
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}
