@@ -12,6 +12,7 @@ import { RecentEvents } from './components/RecentEvents';
 import { ProjectHeader } from './components/ProjectHeader';
 import { PRDViewModal } from './components/PRDViewModal';
 import { PRDSelectionModal } from './components/PRDSelectionModal';
+import { TaskList } from './components/TaskList';
 import { useDevWorkflowData } from './hooks/useDevWorkflowData';
 
 export function App() {
