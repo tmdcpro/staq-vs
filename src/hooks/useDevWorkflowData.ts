@@ -16,6 +16,8 @@ export interface ExperimentPath {
   team: string;
   branch: string;
   lastUpdate: string;
+  tasks: Task[];
+  dependsOn?: string[];
 }
 
 export interface DevWorkflowData {
@@ -25,6 +27,10 @@ export interface DevWorkflowData {
   projectOverview: {
     totalExperiments: number;
     activeExperiments: number;
+    prdPath?: string;
+    projectName: string;
+    currentPhase: string;
+    phaseDescription?: string;
     completedExperiments: number;
     averageVelocity: number;
     overallProgress: number;
@@ -35,14 +41,70 @@ export interface DevWorkflowData {
   recentEvents: {
     timestamp: string;
     type: 'milestone' | 'merge' | 'test_failure' | 'experiment_start' | 'experiment_complete';
+    experimentId: string;
     experiment: string;
     description: string;
     priority: 'high' | 'medium' | 'low';
   }[];
 }
 
+export interface Task {
+  id: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'active' | 'completed' | 'failed' | 'blocked';
+  priority: 'low' | 'medium' | 'high' | 'critical';
+  assignee?: string;
+  estimatedHours: number;
+  actualHours?: number;
+  dependsOn?: string[];
+  experimentId: string;
+  progress: number;
+  startDate?: string;
+  dueDate?: string;
+  completedDate?: string;
+  lastUpdated: string;
+}
+
 const initialData: DevWorkflowData = {
   experiments: {
+    'exp-001': {
+      id: 'exp-001',
+      name: 'React Component Approach',
+      approach: 'Component-based architecture with hooks',
+      status: 'active',
+      progress: 75,
+      tasksCompleted: 15,
+      totalTasks: 20,
+      testCoverage: 92,
+      qualityScore: 88,
+      velocity: 2.3,
+      estimatedCompletion: '2024-01-15',
+      risk: 'low',
+      team: 'Frontend Team A',
+      branch: 'feature/react-components',
+      lastUpdate: '2 hours ago',
+      tasks: [
+        {
+          id: 'task-001',
+          title: 'Design Component Architecture',
+          description: 'Create a detailed design for the component architecture',
+          status: 'completed',
+          priority: 'high',
+          assignee: 'Sarah Chen',
+          estimatedHours: 8,
+          actualHours: 7.5,
+          experimentId: 'exp-001',
+          progress: 100,
+          startDate: '2024-01-01',
+          dueDate: '2024-01-02',
+          completedDate: '2024-01-02',
+          lastUpdated: '2024-01-02'
+        },
+        // Add more tasks here in a real implementation
+      ],
+      dependsOn: []
+    },
     'exp-001': {
       id: 'exp-001',
       name: 'React Component Approach',
@@ -98,8 +160,12 @@ const initialData: DevWorkflowData = {
   projectOverview: {
     totalExperiments: 3,
     activeExperiments: 3,
+    prdPath: '/home/user/projects/dwo/PROJECT_REQUIREMENTS.md',
+    projectName: 'Dev Workflow Orchestrator',
+    currentPhase: 'Implementation',
+    phaseDescription: 'Building core components and establishing the architecture',
     completedExperiments: 0,
-    averageVelocity: 1.87,
+    averageVelocity: 1.86,
     overallProgress: 60
   },
   dailyVelocity: [
@@ -125,6 +191,7 @@ const initialData: DevWorkflowData = {
     {
       timestamp: '2024-01-10 14:30',
       type: 'milestone',
+      experimentId: 'exp-001',
       experiment: 'exp-001',
       description: 'Component library milestone reached',
       priority: 'high'
@@ -132,6 +199,7 @@ const initialData: DevWorkflowData = {
     {
       timestamp: '2024-01-10 11:15',
       type: 'test_failure',
+      experimentId: 'exp-002',
       experiment: 'exp-002',
       description: 'Integration tests failing on GraphQL endpoint',
       priority: 'medium'
@@ -139,6 +207,7 @@ const initialData: DevWorkflowData = {
     {
       timestamp: '2024-01-10 09:45',
       type: 'merge',
+      experimentId: 'exp-003',
       experiment: 'exp-003',
       description: 'Feature branch merged to develop',
       priority: 'low'

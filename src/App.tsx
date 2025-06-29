@@ -1,14 +1,17 @@
 import React from 'react';
-import { Moon, Sun, GitBranch, Code, BarChart3, Users } from 'lucide-react';
+import { Moon, Sun, GitBranch, Code, BarChart3, Users, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { ExperimentPath } from './components/ExperimentPath';
 import { ProjectOverview } from './components/ProjectOverview';
 import { DAGVisualization } from './components/DAGVisualization';
 import { SimStudioIntegration } from './components/SimStudioIntegration';
 import { VelocityChart } from './components/VelocityChart';
-import { QualityTrend } from './components/QualityTrend'; 
+import { QualityTrend } from './components/QualityTrend';
 import { ResourceAllocation } from './components/ResourceAllocation';
 import { RecentEvents } from './components/RecentEvents';
+import { ProjectHeader } from './components/ProjectHeader';
+import { PRDViewModal } from './components/PRDViewModal';
+import { PRDSelectionModal } from './components/PRDSelectionModal';
 import { useDevWorkflowData } from './hooks/useDevWorkflowData';
 
 export function App() {
@@ -16,6 +19,10 @@ export function App() {
   const data = useDevWorkflowData();
 
   const [selectedTab, setSelectedTab] = React.useState<'dag' | 'simstudio'>('dag');
+  const [isPRDModalOpen, setIsPRDModalOpen] = React.useState(false);
+  const [isPRDSelectionOpen, setIsPRDSelectionOpen] = React.useState(false);
+  
+  const hasPRD = !!data.projectOverview.prdPath;
 
   React.useEffect(() => {
     if (darkMode) {
@@ -77,7 +84,31 @@ export function App() {
       </nav>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-        {/* Project Overview */}
+        {/* Project Header - New Component */}
+        <ProjectHeader
+          onViewPRD={() => setIsPRDModalOpen(true)}
+          onSelectPRD={() => setIsPRDSelectionOpen(true)}
+        />
+
+        {/* PRD View Modal */}
+        <PRDViewModal 
+          isOpen={isPRDModalOpen} 
+          onClose={() => setIsPRDModalOpen(false)}
+          prdPath={data.projectOverview.prdPath}
+        />
+        
+        {/* PRD Selection Modal */}
+        <PRDSelectionModal 
+          isOpen={!hasPRD || isPRDSelectionOpen}
+          onClose={() => setIsPRDSelectionOpen(false)}
+          onSelectPRD={(path) => {
+            // In a real app, you would update the data here
+            console.log(`Selected PRD: ${path}`);
+            setIsPRDSelectionOpen(false);
+          }}
+        />
+
+        {/* Task Progress Overview */}
         <div className="mb-6">
           <ProjectOverview {...data.projectOverview} />
         </div>

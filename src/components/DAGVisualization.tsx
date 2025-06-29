@@ -30,6 +30,7 @@ export function DAGVisualization({ className = '', onNodeInteraction }: DAGVisua
   const graphMetrics = useMemo(() => calculateGraphMetrics(graphData), [graphData]);
 
   const handleNodeInteraction = useCallback((event: GraphInteractionEvent) => {
+    console.log('Node interaction:', event);
     if (event.type === 'node-click' && event.nodeId) {
       setSelectedNodeId(event.nodeId);
     }
@@ -51,6 +52,9 @@ export function DAGVisualization({ className = '', onNodeInteraction }: DAGVisua
   const selectedNode = selectedNodeId ? 
     graphData.nodes.find(n => n.id === selectedNodeId) : null;
 
+  // Show PRD filename/path in the section header
+  const prdPath = workflowData.projectOverview.prdPath || 'No PRD Selected';
+
   return (
     <div className={`bg-white dark:bg-card-dark rounded-lg shadow-card dark:shadow-none transition-colors duration-200 ${className}`}>
       {/* Header */}
@@ -61,8 +65,10 @@ export function DAGVisualization({ className = '', onNodeInteraction }: DAGVisua
               <Network className="h-6 w-6 text-accent-purple" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Development Workflow DAG
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                Development Workflow DAG 
+                <span className="text-xs ml-2 bg-gray-100 dark:bg-gray-700 rounded-full px-2 py-1 text-gray-600 dark:text-gray-400">
+                  {prdPath.split('/').pop() || prdPath}</span>
               </h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 Interactive visualization of parallel development paths
