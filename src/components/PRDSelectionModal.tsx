@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { File, Upload, Plus, X, FileText } from 'lucide-react';
+import { File as FileIcon, Upload, Plus, X, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface PRDSelectionModalProps {
@@ -125,7 +125,7 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
               <div>
                 {selectedFile ? (
                   <div className="flex items-center justify-center">
-                    <File className="h-8 w-8 text-primary-DEFAULT mb-2" />
+                    <FileIcon className="h-8 w-8 text-primary-DEFAULT mb-2" />
                     <span className="block text-sm font-medium text-gray-900 dark:text-white ml-2">{selectedFile.name}</span>
                   </div>
                 ) : (
