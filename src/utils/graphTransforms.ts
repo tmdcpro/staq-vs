@@ -217,16 +217,6 @@ function calculateTaskPosition(expIndex: number, taskIndex: number, totalTasks: 
   };
 }
 
-function calculateTaskPosition(expIndex: number, taskIndex: number, totalTasks: number): { x: number; y: number } {
-  const baseX = 100 + expIndex * 300;
-  const baseY = 300 + (taskIndex / totalTasks) * 200;
-  
-  return {
-    x: baseX,
-    y: baseY
-  };
-}
-
 export function generateExperimentDependencies(experiments: Record<string, ExperimentPath>) {
   const deps = [];
   const expKeys = Object.keys(experiments);
