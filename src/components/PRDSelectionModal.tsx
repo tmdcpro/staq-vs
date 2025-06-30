@@ -9,7 +9,7 @@ interface PRDSelectionModalProps {
 }
 
 export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelectionModalProps) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isFilePickerSupported, setIsFilePickerSupported] = useState(true);
   const [recentPRDs, setRecentPRDs] = useState([
@@ -28,7 +28,7 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     console.log('File input change event triggered', event.target.files);
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      setSelectedFileName(event.target.files[0].name);
       console.log('File selected:', event.target.files[0].name);
     }
   };
@@ -54,16 +54,16 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
     
     const files = event.dataTransfer.files;
     if (files && files[0]) {
-      setSelectedFile(files[0]);
+      setSelectedFileName(files[0].name);
       console.log('File dropped:', files[0].name);
     }
     fileInputRef.current?.click();
   };
 
   const handleImport = () => {
-    if (selectedFile) {
+    if (selectedFileName) {
       // In a real app, you'd handle the file upload here
-      onSelectPRD(selectedFile.name);
+      onSelectPRD(selectedFileName);
       onClose();
     }
   };
@@ -123,10 +123,10 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
               )}
               
               <div>
-                {selectedFile ? (
+                {selectedFileName ? (
                   <div className="flex items-center justify-center">
                     <FileIcon className="h-8 w-8 text-primary-DEFAULT mb-2" />
-                    <span className="block text-sm font-medium text-gray-900 dark:text-white ml-2">{selectedFile.name}</span>
+                    <span className="block text-sm font-medium text-gray-900 dark:text-white ml-2">{selectedFileName}</span>
                   </div>
                 ) : (
                   <div>
@@ -163,10 +163,9 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
                   onChange={(e) => {
                     if (e.target.value.trim()) {
                       // Create a virtual file from the pasted content
-                      const file = new File([e.target.value], 'pasted-prd.md', { type: 'text/markdown' });
-                      setSelectedFile(file);
+                      setSelectedFileName('pasted-prd.md');
                     } else {
-                      setSelectedFile(null);
+                      setSelectedFileName(null);
                     }
                   }}
                 />
@@ -211,8 +210,8 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
           </button>
           <button
             onClick={handleImport}
-            disabled={!selectedFile}
-            className={`px-4 py-2 rounded-md text-white transition-colors ${selectedFile ? 'bg-primary-DEFAULT hover:bg-primary-dark' : 'bg-gray-400 cursor-not-allowed'}`}
+            disabled={!selectedFileName}
+            className={`px-4 py-2 rounded-md text-white transition-colors ${selectedFileName ? 'bg-primary-DEFAULT hover:bg-primary-dark' : 'bg-gray-400 cursor-not-allowed'}`}
           >
             Import
           </button>
