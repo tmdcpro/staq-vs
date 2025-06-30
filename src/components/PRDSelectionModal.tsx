@@ -163,8 +163,7 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
                   onChange={(e) => {
                     if (e.target.value.trim()) {
                       // Create a virtual file from the pasted content
-                     const blob = new Blob([e.target.value], { type: 'text/markdown' });
-                      const file = new File([blob], 'pasted-prd.md', { type: 'text/markdown' });
+                      const file = new File([e.target.value], 'pasted-prd.md', { type: 'text/markdown' });
                       setSelectedFile(file);
                     } else {
                       setSelectedFile(null);
