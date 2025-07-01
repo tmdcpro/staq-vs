@@ -20,7 +20,7 @@ export function PRDSelectionModal({ isOpen, onClose, onSelectPRD }: PRDSelection
 
   React.useEffect(() => {
     // Check if file picker is supported in this environment
-    const isSupported = window.File && window.FileReader && window.FileList && window.Blob;
+    const isSupported = typeof window.File !== 'undefined' && typeof window.FileReader !== 'undefined' && typeof window.FileList !== 'undefined' && typeof window.Blob !== 'undefined';
     setIsFilePickerSupported(isSupported);
     console.log('File picker supported:', isSupported);
   }, []);
