@@ -15,6 +15,7 @@ import { ProjectHeader } from './components/ProjectHeader';
 import { PRDViewModal } from './components/PRDViewModal';
 import { PRDSelectionModal } from './components/PRDSelectionModal';
 import { TaskList } from './components/TaskList';
+import { BoltBadge } from './components/BoltBadge';
 import { useDevWorkflowData } from './hooks/useDevWorkflowData';
 import { useTheme } from './hooks/useTheme';
 
@@ -206,6 +207,9 @@ export function App() {
         
         {/* Development Mode Indicator */}
         <DevModeIndicator />
+        
+        {/* Made with Bolt Badge */}
+        <BoltBadge />
       </div>
     </ErrorBoundary>
   );
