@@ -3,10 +3,14 @@
 <p><img src="https://raw.githubusercontent.com/tmdcpro/staq-vs/main/assets/dashboard-screenshot.png" alt="Dashboard Screenshot"> &lt;!-- Replace with your actual image path --&gt;</p>
 <h2><span>⚡ </span><span>Bolt-Project </span><span>for </span><span>World's </span><span>Largest </span><span>Hackathon! </span><span>🌎</span></h2>
 <p><span>Welcome </span><span>to </span><strong><span>Staque </span><span>Pop!</span></strong> <span>– </span><span>a </span><span>modern, </span><span>interactive </span><span>dashboard </span><span>template </span><span>built </span><span>for </span><span>business </span><span>operations, </span><span>analytics, </span><span>and </span><span>visualizations, </span><span>crafted </span><span>with </span><span>love </span><span>and </span><span>code </span><span>for </span><span>the </span><a href="https://worldslargesthackathon.com/"><span>World's </span><span>Largest </span><span>Hackathon</span></a><span>! </span><span>🎉</span></p>
-<blockquote>
+<blockquote> 
 <p><em><span>"Turning </span><span>data </span><span>into </span><span>decisions, </span><span>fast."</span></em></p>
 </blockquote>
 <hr>
+
+<h2><span>💻 </span><span></span><span>Tryou Live Working App here:</span></h2>
+<p><a href="https://calm-kashata-1c907b.netlify.app/"><img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" alt="Try the App"></a></p>
+Tryout Live Working App Demo here (link to cloud-hosted demo): https://calm-kashata-1c907b.netlify.app/
 <h2><span>🎥 </span><span>Demo </span><span>Video</span></h2>
 <p><a href="https://www.youtube.com/watch?v=VIDEO_ID"><img src="https://img.youtube.com/vi/VIDEO_ID/maxresdefault.jpg" alt="Watch the demo"></a></p>
 &lt;!-- Replace VIDEO_ID with your actual YouTube video ID --&gt;
