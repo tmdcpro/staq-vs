@@ -1,5 +1,5 @@
 
-<h1><span>🚀 </span><span>Staque </span><span>Pop! </span><span>– </span><span>Business </span><span>Operations </span><span>Dashboard</span></h1>
+<h1><span>🚀 </span><span>Staque </span><span>Pop! </span><span>– </span><span>Project </span><span>Development </span><span>Dashboard</span></h1>
 <p><img src="https://raw.githubusercontent.com/tmdcpro/staq-vs/main/assets/dashboard-screenshot.png" alt="Dashboard Screenshot"> &lt;!-- Replace with your actual image path --&gt;</p>
 <h2><span>⚡ </span><span>Bolt-Project </span><span>for </span><span>World's </span><span>Largest </span><span>Hackathon! </span><span>🌎</span></h2>
 <p><span>Welcome </span><span>to </span><strong><span>Staque </span><span>Pop!</span></strong> <span>– </span><span>a </span><span>modern, </span><span>interactive </span><span>dashboard </span><span>template </span><span>built </span><span>for </span><span>business </span><span>operations, </span><span>analytics, </span><span>and </span><span>visualizations, </span><span>crafted </span><span>with </span><span>love </span><span>and </span><span>code </span><span>for </span><span>the </span><a href="https://worldslargesthackathon.com/"><span>World's </span><span>Largest </span><span>Hackathon</span></a><span>! </span><span>🎉</span></p>
