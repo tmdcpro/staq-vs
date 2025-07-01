@@ -16,7 +16,17 @@ import { TaskList } from './components/TaskList';
 import { useDevWorkflowData } from './hooks/useDevWorkflowData';
 
 export function App() {
-  const [darkMode, setDarkMode] = React.useState(true);
+  const [darkMode, setDarkMode] = React.useState(() => {
+    // Check localStorage first, then system preference, default to true
+    const saved = localStorage.getItem('darkMode');
+    if (saved !== null) {
+      return JSON.parse(saved);
+    }
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return true;
+  });
   const data = useDevWorkflowData();
 
   const [selectedTab, setSelectedTab] = React.useState<'dag' | 'simstudio'>('dag');
@@ -26,11 +36,10 @@ export function App() {
   const hasPRD = !!data.projectOverview.prdPath;
 
   React.useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    // Apply theme immediately to prevent flash
+    document.documentElement.classList.toggle('dark', darkMode);
+    // Save preference to localStorage
+    localStorage.setItem('darkMode', JSON.stringify(darkMode));
   }, [darkMode]);
 
   const handleToggleExperiment = (experimentId: string) => {

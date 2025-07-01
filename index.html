@@ -5,6 +5,17 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vite + React + TS</title>
+    <script>
+      // Prevent flash of wrong theme by applying dark mode immediately
+      (function() {
+        const saved = localStorage.getItem('darkMode');
+        const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const shouldBeDark = saved !== null ? JSON.parse(saved) : prefersDark;
+        if (shouldBeDark) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
